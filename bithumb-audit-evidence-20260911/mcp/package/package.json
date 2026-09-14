@@ -1,0 +1,41 @@
+{
+  "name": "@bithumb-official/bithumb-mcp",
+  "version": "0.8.5",
+  "description": "Bithumb MCP Server - Model Context Protocol server for Bithumb exchange",
+  "type": "module",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "bithumb-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "test:unit": "node --import tsx/esm --test --test-reporter=spec test/*.test.ts"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0"
+  },
+  "devDependencies": {
+    "@bithumb-official/bithumb-core": "file:../core",
+    "@types/node": "^22.0.0",
+    "tsup": "^8.5.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "bithumb",
+    "mcp",
+    "trade",
+    "exchange",
+    "cryptocurrency"
+  ]
+}

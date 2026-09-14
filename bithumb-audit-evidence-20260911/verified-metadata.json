@@ -1,0 +1,10 @@
+{
+  "github_commit": "2b6304261c81f48256e63b0588db2ca1c44df52f",
+  "cli_version": "0.8.5",
+  "mcp_version": "0.8.5",
+  "files": {
+    "cli/package/dist/chunk-Y64A2CTR.js": "d3c04e89fadd8c230d38dd975509044c5908ecb806adfcd395fa4084707f63d2",
+    "cli/package/dist/index.js": "17caa2054be0d0338dd7d9233eb9c243e1c916efda4eedfc6c217aed5e0d71f3",
+    "mcp/package/dist/index.js": "82f350083588dae3f24a93d794185327fb545797ede9a24b83bd5704193f80ba"
+  }
+}
