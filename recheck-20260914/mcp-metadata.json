@@ -1,0 +1,71 @@
+{
+  "bin": {
+    "bithumb-mcp": "dist/index.js"
+  },
+  "dist": {
+    "shasum": "5da8a20334a5965e212e6a7620d4b09e13460f53",
+    "tarball": "https://registry.npmjs.org/@bithumb-official/bithumb-mcp/-/bithumb-mcp-0.8.5.tgz",
+    "fileCount": 5,
+    "integrity": "sha512-NFfAgYynHSE/onNPpsCQIDm8K5BgTQ+J0GD19710qdPP9aTU7egnTaYJVOmR+/DGAbJ6AmYTWNv/u+cYkddDaA==",
+    "signatures": [
+      {
+        "sig": "MEUCIAw6/BFSL0yJYhKq9SpmQW5WGi9AXlFurS6TGejJJyUfAiEAnq96SVO65qBV3/ylQkdV7VhHxLdCxcsgWdQcM7KEYDk=",
+        "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+      }
+    ],
+    "unpackedSize": 388890
+  },
+  "main": "dist/index.js",
+  "name": "@bithumb-official/bithumb-mcp",
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=18"
+  },
+  "gitHead": "1096e78612c9e140f24a31169dd929266bb08530",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist",
+    "test:unit": "node --import tsx/esm --test --test-reporter=spec test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "_npmUser": {
+    "name": "bithumb-npm",
+    "email": "developers@bithumbcorp.com"
+  },
+  "keywords": [
+    "bithumb",
+    "mcp",
+    "trade",
+    "exchange",
+    "cryptocurrency"
+  ],
+  "_npmVersion": "10.9.8",
+  "description": "Bithumb MCP Server - Model Context Protocol server for Bithumb exchange",
+  "directories": {},
+  "maintainers": [
+    {
+      "name": "bithumb-npm",
+      "email": "developers@bithumbcorp.com"
+    }
+  ],
+  "_nodeVersion": "22.22.3",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0"
+  },
+  "_hasShrinkwrap": false,
+  "devDependencies": {
+    "tsx": "^4.19.3",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "@types/node": "^22.0.0",
+    "@bithumb-official/bithumb-core": "file:../core"
+  },
+  "_npmOperationalInternal": {
+    "tmp": "tmp/bithumb-mcp_0.8.5_1780985826806_0.2261138588184648",
+    "host": "s3://npm-registry-packages-npm-production"
+  },
+  "_id": "@bithumb-official/bithumb-mcp@0.8.5",
+  "version": "0.8.5"
+}

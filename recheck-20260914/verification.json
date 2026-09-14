@@ -1,0 +1,36 @@
+{
+  "checked_at": "2026-09-14T00:40:17.582518+00:00",
+  "sources": [
+    {
+      "name": "order",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "name": "withdraw",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "name": "rate-limit",
+      "error": "HTTP Error 403: Forbidden"
+    }
+  ],
+  "cli": "0.8.5",
+  "mcp": "0.8.5",
+  "github": "2b6304261c81f48256e63b0588db2ca1c44df52f",
+  "node": "v24.19.0",
+  "runs": [
+    {
+      "script": "audit.mjs",
+      "exit_code": 0
+    },
+    {
+      "script": "audit-v2.mjs",
+      "exit_code": 0
+    },
+    {
+      "script": "audit-v3.mjs",
+      "exit_code": 0
+    }
+  ],
+  "run_directory": "/var/folders/2y/j1pg5hzj125cqnyp0c_p42z40000gn/T/bithumb-recheck-frekeyat"
+}

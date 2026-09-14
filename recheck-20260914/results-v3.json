@@ -1,0 +1,54 @@
+[
+  {
+    "test": "malformed_config_discloses_secret_in_error",
+    "secretVisible": true,
+    "error": "Failed to parse /private/var/folders/2y/j1pg5hzj125cqnyp0c_p42z40000gn/T/bithumb-recheck-frekeyat/fixture-v3-Wzwsqq/.bithumb/config.toml: Invalid TOML document: invalid value\n\n4:  secret_key=\"FAKE_SECRET_MUST_NOT_APPEAR\"\n5:  read_only=tru\n              ^\n"
+  },
+  {
+    "test": "full_CLI_stderr_leaks_adjacent_valid_secret",
+    "exitCode": 1,
+    "stderr": "Fatal: Failed to parse /private/var/folders/2y/j1pg5hzj125cqnyp0c_p42z40000gn/T/bithumb-recheck-frekeyat/fixture-v3-Wzwsqq/.bithumb/config.toml: Invalid TOML document: invalid value\n\n4:  secret_key=\"FAKE_SECRET_MUST_NOT_APPEAR\"\n5:  read_only=tru\n              ^\n\n"
+  },
+  {
+    "test": "wizard_true_disables_readonly",
+    "readOnlyBefore": true,
+    "answer": "true",
+    "readOnlyAfter": false,
+    "prompt": "Read-only? (y/N) [y]: ",
+    "output": "Updated profile 'test'\n"
+  },
+  {
+    "test": "positive_control_wizard_y",
+    "readOnlyAfter": true
+  },
+  {
+    "test": "withdraw_consent_url_discarded",
+    "responseCarriedURL": true,
+    "errorCarriedURL": false,
+    "error": {
+      "name": "BithumbApiError",
+      "message": "travel_rule_consent_required: MOCK consent required",
+      "properties": {
+        "message": "travel_rule_consent_required: MOCK consent required",
+        "type": "BithumbApiError",
+        "code": "travel_rule_consent_required",
+        "endpoint": "POST /v1/withdraws/coin",
+        "name": "BithumbApiError"
+      }
+    }
+  },
+  {
+    "test": "audit_storage_failure_silent",
+    "logWritten": false,
+    "errorThrown": false,
+    "stderr": ""
+  },
+  {
+    "test": "positive_control_withdraw_decimal_and_tag_preserved",
+    "passed": true
+  },
+  {
+    "test": "positive_control_receiver_required_names",
+    "passed": true
+  }
+]

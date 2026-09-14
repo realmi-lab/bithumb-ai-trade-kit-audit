@@ -1,0 +1,31 @@
+{
+  "test": "diagnose_failed_auth_exit_zero",
+  "exitCode": 0,
+  "checks": [
+    {
+      "name": "API Reachability",
+      "status": "pass",
+      "message": "https://api.bithumb.com reachable (HTTP 200)"
+    },
+    {
+      "name": "Authentication",
+      "status": "pass",
+      "message": "API keys configured (BITHUMB_ACCESS_KEY/BITHUMB_SECRET_KEY env vars or config.toml profile)"
+    },
+    {
+      "name": "TOML Config",
+      "status": "fail",
+      "message": "Not found: /private/var/folders/2y/j1pg5hzj125cqnyp0c_p42z40000gn/T/bithumb-recheck-frekeyat/fixture-v2-NgyJNF/.bithumb/config.toml (optional — run 'bithumb config init' to create)"
+    },
+    {
+      "name": "Enabled Modules",
+      "status": "pass",
+      "message": "Active: market, account, trade, twap, withdraw, deposit, system"
+    },
+    {
+      "name": "Auth Validity",
+      "status": "fail",
+      "message": "API key rejected by server (invalid_access_key: MOCK authentication rejection). Check your access_key and secret_key."
+    }
+  ]
+}

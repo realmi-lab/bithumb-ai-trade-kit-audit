@@ -2,7 +2,23 @@
 
 작성일: 2026-09-11 (한국 시간)
 
+재검사 및 상세 보강: 2026-09-14 (한국 시간)
+
 이 문서는 지금까지 조사한 허점, 검증 근거, 공식 참고 문서, 재현 방법, 우리가 구현해야 할 보호 장치, 앞으로의 검사 계획을 모은 작업 기준서다. 다음 작업자는 이 문서와 함께 보관된 증거부터 읽는다. 전체 보안 감사 완료나 모든 허점 발견을 의미하지 않는다.
+
+
+## 2026-09-14 재검사 결과와 읽는 순서
+
+**F01~F11은 보관본에서 다시 재현됐다. 현재 npm CLI/MCP latest도 0.8.5이며, 새로 내려받은 tarball 전체 파일이 보관본과 일치한다.** GitHub main도 기존 커밋과 같다. 이는 검사 시점의 사실이며 이후 릴리스에는 다시 확인해야 한다.
+
+- 기존 재현 스크립트 3개를 독립 임시 복사본에서 실행했고 종료 코드 모두 0이었다. 이는 결함 재현 assertion 통과이며 제품 정상 판정이 아니다.
+- F04는 함수 스텁을 넘어 실제 MCP SDK 1.26.0과 stdio JSON-RPC 통신으로 추가 재현했다. F09는 HTTP 401과 정확한 인증 검사 항목을 사용하는 사례를 추가했다.
+- 원래 증거 파일은 덮어쓰지 않았다. 신규 결과는 [재검사 폴더](./recheck-20260914/), 추가 실행 방법은 [재검사 안내](./recheck-20260914/README.md)에 있다.
+- 공식 주문·출금·요청 제한 웹 문서를 다시 읽었다. `.md` 원문 자동 저장은 403으로 실패하여 완전한 원문 스냅샷 확보로 처리하지 않았다.
+- C01~C04는 조건부 위험/설계 경계이며 C05는 원문 추가 검증이 남았다. 문서의 향후 시나리오 전체를 실행했다는 의미가 아니다.
+- 제품 소스 수정·실계정 거래·운영 배포는 하지 않았다. Node v24.19.0으로 검사했다.
+
+[버전 확인 기록](./recheck-20260914/verification.json) · [배포 패키지 전체 대조](./recheck-20260914/package-comparison.json) · [실제 MCP stdio 결과](./recheck-20260914/mcp-stdio-results.json)
 
 ## 1. 목적과 현재 상태
 
@@ -40,7 +56,7 @@
 ### 검증 수준
 
 - **CLI 재현:** 실제 배포 CLI의 파서·설정 로더·요청 생성·출력 경로를 실행했다. 일부는 실제 별도 CLI 프로세스로 확인했다.
-- **MCP 함수 재현:** 배포 코드의 등록 함수 및 요청 처리 함수를 실행하되 SDK 등록 부분은 스텁으로 대체했다. 실제 MCP 전송 계층과 AI 클라이언트의 스키마 검증은 별도 검사 대상이다.
+- **MCP 함수 재현:** 기존 1~3차는 SDK 등록 부분을 스텁으로 대체했다. 2026-09-14 F04와 읽기 전용 대조군은 실제 SDK stdio 검사로 보강했다. 나머지 MCP 사례와 개별 AI 앱 검사는 이 보강 범위에 포함하지 않는다.
 - **계약 기반 모의 재현:** 공식 API 문서에 맞춘 모의 응답을 입력했다. 실제 서버의 응답·체결을 관찰한 것과 구분한다.
 - **조건부 위험·설계 경계:** 코드에서 위험 조건은 확인했지만 실제 손실이나 악용까지 입증하지 않은 항목이다.
 
@@ -65,6 +81,22 @@
 - 할 일: 파서 원문을 사용자 출력에 직접 전달하지 않는다. 파일·행·열·안전한 오류 코드만 출력하고 예외·로그 경로 전반에 비밀값 제거를 적용한다.
 - 완료 기준: 비밀값을 인접 줄·배열·예외 원인에 넣어도 stdout/stderr/로그/MCP 응답 어디에도 노출되지 않는다. 정상 설정은 계속 읽힌다.
 
+**2026-09-14 재검사 상세**
+
+- 판정: **재현 유지 — 실제 CLI 별도 프로세스**.
+- 재현 입력: 가짜 secret_key가 정상인 설정에서 다음 줄만 read_only=tru로 만든 뒤 account assets 실행.
+- 실행 경로와 원인: 설정 파서가 인접 줄을 포함한 오류를 만들고 최종 catch가 그대로 출력한다. CLI가 실패 종료해도 비밀값 출력은 이미 발생한다.
+- 해석과 제한: 오류 반환과 비밀정보 보호는 별도 검사해야 한다. 수정 후 동일 가짜 비밀값을 stdout·stderr·파일 로그 전체에서 검색하고 0건을 요구한다.
+- 이번 실행 증거: [results-v3.json](./recheck-20260914/results-v3.json)의 `full_CLI_stderr_leaks_adjacent_valid_secret` 항목.
+
+```json
+{
+  "test": "full_CLI_stderr_leaks_adjacent_valid_secret",
+  "exitCode": 1,
+  "stderr": "Fatal: Failed to parse /private/var/folders/2y/j1pg5hzj125cqnyp0c_p42z40000gn/T/bithumb-recheck-frekeyat/fixture-v3-Wzwsqq/.bithumb/config.toml: Invalid TOML document: invalid value\n\n4:  secret_key=\"FAKE_SECRET_MUST_NOT_APPEAR\"\n5:  read_only=tru\n              ^\n\n"
+}
+```
+
 ### F02. 없는/불완전한 프로필에서 환경변수 계정으로 넘어감 — P0
 
 **오류 위치 — 보관된 0.8.5 배포 코드**
@@ -80,6 +112,22 @@
 - 할 일: 명시적으로 지정한 프로필이 없거나 불완전하면 즉시 실패시킨다. 키 쌍을 서로 다른 출처에서 조합하지 않는다. 실행 계정의 안전한 식별값과 설정 출처를 보여준다.
 - 완료 기준: 잘못된 프로필에서 네트워크 호출 0회. 의도한 정상 프로필에서는 성공. 자동 fallback은 명시적 정책 없이는 금지한다.
 
+**2026-09-14 재검사 상세**
+
+- 판정: **재현 유지 — core 및 CLI**.
+- 재현 입력: 읽기 전용 프로필과 가짜 환경변수 키를 동시에 준비하고 --profile missing으로 주문을 요청.
+- 실행 경로와 원인: 프로필을 못 찾으면 빈 객체가 되고 환경변수의 완전한 키 쌍이 선택된다. 기본 readOnly=false와 결합하여 요청 1회가 생성된다.
+- 해석과 제한: 환경변수에 키가 없는 조건과 있는 조건을 분리한다. 다른 계정으로 실제 거래가 이루어진 검증은 아니며 가짜 키 선택과 요청 생성까지 확인했다.
+- 이번 실행 증거: [results-v2.json](./recheck-20260914/results-v2.json)의 `full_CLI_missing_profile_write` 항목.
+
+```json
+{
+  "test": "full_CLI_missing_profile_write",
+  "requestSent": 1,
+  "exitCode": 0
+}
+```
+
 ### F03. 읽기 전용 마법사의 알 수 없는 입력이 보호를 해제함 — P0
 
 **오류 위치 — 보관된 0.8.5 배포 코드**
@@ -93,6 +141,25 @@
 - 할 일: 허용 입력을 명확하게 파싱하고 그 외에는 재질문한다. 빈 입력은 기존 값 유지. 보호 해제는 명확한 동작으로 표시한다.
 - 완료 기준: 오타·공백·true/false·한글 응답 등에 대한 정책이 명시되어 있고, 인식하지 못한 값은 기존 보호를 바꾸지 않는다.
 
+**2026-09-14 재검사 상세**
+
+- 판정: **재현 유지 — 실제 설정 마법사 handler**.
+- 재현 입력: 기존 read_only=true인 프로필에서 나머지 입력은 유지하고 Read-only? 질문에 true 입력.
+- 실행 경로와 원인: 정규식 /^y(es)?$/i가 false를 반환하고 기존 보호 설정을 false로 덮어쓴다. Updated profile만 출력된다.
+- 해석과 제한: 정상 y 입력은 true를 유지했다. 미지원 응답을 보호 해제로 해석하는 것이 문제이며 API 자체 권한을 우회하지 않는다.
+- 이번 실행 증거: [results-v3.json](./recheck-20260914/results-v3.json)의 `wizard_true_disables_readonly` 항목.
+
+```json
+{
+  "test": "wizard_true_disables_readonly",
+  "readOnlyBefore": true,
+  "answer": "true",
+  "readOnlyAfter": false,
+  "prompt": "Read-only? (y/N) [y]: ",
+  "output": "Updated profile 'test'\n"
+}
+```
+
 ### F04. MCP 단일 주문에서 time_in_force가 빠짐 — P0
 
 **오류 위치 — 보관된 0.8.5 배포 코드**
@@ -102,9 +169,31 @@
 - 조건: 단일 주문 handler에 `post_only`, `ioc`, `fok`를 전달한다.
 - 실제 동작: 오류 없이 요청 본문에서 해당 필드를 제외한다. 배치 주문은 보존한다. CLI의 미지원 옵션은 오류로 차단한다.
 - 근거: 2차 `MCP_single_order_drops_time_in_force`, 배치 대조군; 공식 주문 요청 문서.
-- 영향: 주문 조건이 유지되지 않는 요청이 만들어질 수 있다. 실제 MCP 클라이언트가 미등록 필드를 차단하는지는 미검증이다.
+- 영향: 주문 조건이 유지되지 않는 요청이 만들어질 수 있다. 2026-09-14 실제 SDK 1.26.0 서버의 stdio 경로에서도 누락을 확인했다. 개별 AI 앱의 입력 검증은 미검증이다.
 - 할 일: 도구 스키마→handler→REST 본문까지 지원 조건을 일치시키거나 미지원 조건을 명시적으로 거부한다.
 - 완료 기준: 실제 MCP SDK 경로에서도 지원 값은 보존되고 미지원 값은 요청 전 차단된다. 실제 체결 결과를 입증한 것으로 확대하지 않는다.
+
+**2026-09-14 재검사 상세**
+
+- 판정: **검증 강화 — 실제 MCP SDK 1.26.0 + stdio**.
+- 재현 입력: initialize → notifications/initialized → tools/list → tools/call 순서로 연결. 각각 post_only, ioc, fok 포함 주문을 전송.
+- 실행 경로와 원인: tools/list에 time_in_force가 없지만 서버는 추가 인수를 거부하지 않았다. 실제 tools/call 처리 후 세 요청 모두 조건이 빠진 POST 본문을 만들고 ok=true를 반환했다.
+- 해석과 제한: 새 mcp-stdio-results.json이 함수 스텁 검사의 한계를 보완한다. 특정 AI 앱의 별도 검증과 실제 체결은 미검증이다. 같은 SDK 경로의 --read-only는 READ_ONLY_MODE와 요청 0회로 정상 차단됐다.
+- 이번 실행 증거: [results-v2.json](./recheck-20260914/results-v2.json)의 `MCP_single_order_drops_time_in_force` 항목.
+
+```json
+{
+  "test": "MCP_single_order_drops_time_in_force",
+  "input": "post_only",
+  "sent": {
+    "market": "KRW-BTC",
+    "side": "bid",
+    "order_type": "limit",
+    "price": "100000000",
+    "volume": "0.001"
+  }
+}
+```
 
 ### F05. 배치 주문 전체 실패인데 CLI는 성공 종료·성공 로그 — P1
 
@@ -119,6 +208,22 @@
 - 할 일: 전체 성공·부분 성공·전체 실패를 구분하고 각 주문의 결과를 보존한다. 종료 코드 계약을 문서화한다.
 - 완료 기준: 전부 실패는 실패 종료, 부분 성공은 명시된 정책으로 표시. 재시도는 성공 항목까지 다시 보내지 않는다.
 
+**2026-09-14 재검사 상세**
+
+- 판정: **재현 유지 — CLI main 및 로그 wrapper**.
+- 재현 입력: 배치 한 건에 insufficient_funds 오류 항목만 들어 있는 모의 응답을 반환.
+- 실행 경로와 원인: HTTP 호출 자체의 반환과 개별 주문 성공을 구분하지 않아 결과를 출력한 뒤 종료 코드 0을 유지한다. 예외가 없으므로 wrapper는 status ok를 기록한다.
+- 해석과 제한: 이번 입력은 한 항목 전체 실패다. 여러 항목의 혼합 성공·실패와 실제 API 배치 오류 스키마는 별도 회귀 사례로 보강해야 한다.
+- 이번 실행 증거: [results-v2.json](./recheck-20260914/results-v2.json)의 `full_CLI_all_failed_batch` 항목.
+
+```json
+{
+  "test": "full_CLI_all_failed_batch",
+  "exitCode": 0,
+  "stdout": "{\n  \"batch_orders_response\": [\n    {\n      \"name\": \"insufficient_funds\",\n      \"message\": \"MOCK_ALL_FAILED\"\n    }\n  ]\n}\n"
+}
+```
+
 ### F06. 로그 마스킹이 배열과 일부 키 이름을 놓침 — P1
 
 **오류 위치 — 보관된 0.8.5 배포 코드**
@@ -130,6 +235,23 @@
 - 영향: 해당 형태의 민감정보가 입력되면 기록될 수 있다. API가 실제 Secret Key를 반환한다는 증거는 없으며 F01과는 다른 경로다.
 - 할 일: 배열·중첩 객체·필드명 변형을 처리하고, 가능하면 기록 허용 필드 목록을 적용한다.
 - 완료 기준: 동일 비밀값을 여러 깊이·필드명으로 넣은 테스트에서 전부 제거되고 진단용 비민감 필드는 유지된다.
+
+**2026-09-14 재검사 상세**
+
+- 판정: **재현 유지 — 로그 마스킹 함수**.
+- 재현 입력: 최상위 secret 필드, 배열 안 비밀값, access_key 이름을 가진 가짜 데이터를 비교.
+- 실행 경로와 원인: 최상위 인식 필드는 가려지지만 배열과 일부 이름에서는 비밀값이 남는다.
+- 해석과 제한: 실제 거래소 응답에 Secret Key가 들어 있다는 주장은 하지 않는다. F01은 별도로 실제 CLI 출력까지 확인한 유출 경로다.
+- 이번 실행 증거: [results.json](./recheck-20260914/results.json)의 `redaction` 항목.
+
+```json
+{
+  "test": "redaction",
+  "arraySecretUnmasked": true,
+  "accessKeyUnmasked": true,
+  "topLevelSecretMasked": true
+}
+```
 
 ### F07. 감사 로그 조회 응답을 다시 로그로 기록하여 중첩 증가 — P1
 
@@ -144,6 +266,58 @@
 - 영향: 반복 조회로 디스크·파싱 메모리·AI 입력이 증폭된다. 실제 디스크 고갈/OOM은 시험하지 않았다.
 - 할 일: 로그 조회는 메타데이터만 기록하거나 응답 기록에서 제외한다. 읽기 전 파일/행/바이트 제한 및 순환 보관을 적용한다.
 - 완료 기준: 반복 조회 증가량이 설정한 상한 내에 있고 과거 로그가 재귀 포함되지 않는다. 작은 limit에 전체 로그를 읽지 않는다.
+
+**2026-09-14 재검사 상세**
+
+- 판정: **재현 유지 — MCP handler와 실제 로그 저장**.
+- 재현 입력: 읽기 전용 상태에서 seed 로그를 만든 후 limit=20으로 로그 조회 7회.
+- 실행 경로와 원인: 각 조회 결과가 다음 로그에 다시 포함된다. 파일은 381→973→2157→4525→9261→18733→37677 bytes, 마지막 응답은 73671 bytes다.
+- 해석과 제한: 1MB 전에 중단하도록 assertion을 두었다. 실제 SDK 통신으로 확대한 검사는 F04에 한정되며 이 로그 사례는 여전히 등록 스텁을 사용한다.
+- 이번 실행 증거: [results-v2.json](./recheck-20260914/results-v2.json)의 `MCP_audit_log_recursive_amplification` 항목.
+
+```json
+{
+  "test": "MCP_audit_log_recursive_amplification",
+  "sizes": [
+    {
+      "iteration": 1,
+      "responseBytes": 717,
+      "diskBytes": 381
+    },
+    {
+      "iteration": 2,
+      "responseBytes": 1617,
+      "diskBytes": 973
+    },
+    {
+      "iteration": 3,
+      "responseBytes": 3543,
+      "diskBytes": 2157
+    },
+    {
+      "iteration": 4,
+      "responseBytes": 7647,
+      "diskBytes": 4525
+    },
+    {
+      "iteration": 5,
+      "responseBytes": 16359,
+      "diskBytes": 9261
+    },
+    {
+      "iteration": 6,
+      "responseBytes": 34791,
+      "diskBytes": 18733
+    },
+    {
+      "iteration": 7,
+      "responseBytes": 73671,
+      "diskBytes": 37677
+    }
+  ],
+  "readOnlyMode": true
+}
+```
 
 ### F08. 호출 제한을 API 분류 합산 대신 개별 도구로 나눔 — P1
 
@@ -160,6 +334,26 @@
 - 할 일: API 분류별 공유 제한기와 같은 외부 IP를 쓰는 작업자 간 예산을 설계한다. 읽기 재시도와 쓰기 결과 불명 처리를 구분한다.
 - 완료 기준: 모의 시계로 합산 한도 검증, 다중 작업자 공유 검증, 429 처리 검증. 실서버 부하 없이 수행한다.
 
+**2026-09-14 재검사 상세**
+
+- 판정: **재현 유지 — 실제 제한기·모의 시계**.
+- 재현 입력: Date.now를 고정하고 account_get_assets 100회와 account_get_order_chance 100회 호출.
+- 실행 경로와 원인: 분류 공유가 아니라 서로 다른 key의 버킷에서 토큰을 차감하여 같은 시각에 모의 fetch 200회가 통과한다.
+- 해석과 제한: 공식 문서에서 IP·분류별 합산 및 Private 기타 140회를 다시 확인했다. HTTP 요청은 실제 거래소로 전송하지 않았고 서버의 구체 차단 시점은 미검증이다.
+- 이번 실행 증거: [results-v2.json](./recheck-20260914/results-v2.json)의 `private_other_rate_limit_not_aggregated` 항목.
+
+```json
+{
+  "test": "private_other_rate_limit_not_aggregated",
+  "sameTimestampCalls": 200,
+  "officialClassLimit": 140,
+  "buckets": [
+    "account_get_assets",
+    "account_get_order_chance"
+  ]
+}
+```
+
 ### F09. 인증 진단 실패도 종료 코드 0 — P1
 
 **오류 위치 — 보관된 0.8.5 배포 코드**
@@ -171,6 +365,48 @@
 - 영향: 종료 코드만 검사하는 사전 점검이 통과할 수 있다. JSON checks를 읽으면 실패는 확인된다.
 - 할 일: 필수 진단 실패를 실패 종료로 연결하고 우리 자동화도 구조화된 검사 결과를 확인한다.
 - 완료 기준: 필수 검사 실패 시 다음 거래 단계가 실행되지 않는다. 선택적 경고와 필수 실패를 구분한다.
+
+**2026-09-14 재검사 상세**
+
+- 판정: **검증 강화 — HTTP 401 모의 응답**.
+- 재현 입력: 기존 검사는 오류 본문과 HTTP 200의 조합이었다. 이번에는 invalid_access_key에 HTTP 401을 반환하고 Auth Validity 자체가 fail인지 확인.
+- 실행 경로와 원인: Auth Validity가 실패해도 cmdDiagnose는 결과 출력만 하므로 종료 코드 0을 유지한다. 선택 항목 TOML 실패만으로 판정하지 않도록 assertion도 강화했다.
+- 해석과 제한: 정확한 HTTP 401 추가 결과는 http401-results.json에 있다. 실제 계정 인증을 시도한 것은 아니다.
+- 이번 실행 증거: [http401-results.json](./recheck-20260914/http401-results.json)의 `diagnose_failed_auth_exit_zero` 항목.
+
+```json
+{
+  "test": "diagnose_failed_auth_exit_zero",
+  "exitCode": 0,
+  "checks": [
+    {
+      "name": "API Reachability",
+      "status": "pass",
+      "message": "https://api.bithumb.com reachable (HTTP 200)"
+    },
+    {
+      "name": "Authentication",
+      "status": "pass",
+      "message": "API keys configured (BITHUMB_ACCESS_KEY/BITHUMB_SECRET_KEY env vars or config.toml profile)"
+    },
+    {
+      "name": "TOML Config",
+      "status": "fail",
+      "message": "Not found: /private/var/folders/2y/j1pg5hzj125cqnyp0c_p42z40000gn/T/bithumb-recheck-frekeyat/fixture-v2-NgyJNF/.bithumb/config.toml (optional — run 'bithumb config init' to create)"
+    },
+    {
+      "name": "Enabled Modules",
+      "status": "pass",
+      "message": "Active: market, account, trade, twap, withdraw, deposit, system"
+    },
+    {
+      "name": "Auth Validity",
+      "status": "fail",
+      "message": "API key rejected by server (invalid_access_key: MOCK authentication rejection). Check your access_key and secret_key."
+    }
+  ]
+}
+```
 
 ### F10. 출금 동의 오류의 consent_url이 사라짐 — P1
 
@@ -185,6 +421,33 @@
 - 할 일: 안전한 구조화 오류 필드와 사용자 조치 상태를 보존한다. 동의 필요 상태는 자동 재시도 대신 사용자 조치 대기로 전환한다.
 - 완료 기준: 문서의 실제 응답 스키마를 추가 확인하고 URL이 호출자에게 전달된다. 무관한 민감정보를 통째로 노출하지 않는다.
 
+**2026-09-14 재검사 상세**
+
+- 판정: **재현 유지 — 공식 계약 기반 모의 422**.
+- 재현 입력: travel_rule_consent_required와 가짜 consent_url을 최상위·error 내부 양쪽에 넣은 422 응답 사용.
+- 실행 경로와 원인: 예외 변환 후 name/message/code/endpoint만 남고 URL은 없다. 동의가 필요한 상태는 전달되지만 다음 조치 정보가 손실된다.
+- 해석과 제한: 문서의 동의 안내는 재확인했다. 실제 서버가 URL을 배치하는 정확한 위치와 실출금 응답은 미검증이다.
+- 이번 실행 증거: [results-v3.json](./recheck-20260914/results-v3.json)의 `withdraw_consent_url_discarded` 항목.
+
+```json
+{
+  "test": "withdraw_consent_url_discarded",
+  "responseCarriedURL": true,
+  "errorCarriedURL": false,
+  "error": {
+    "name": "BithumbApiError",
+    "message": "travel_rule_consent_required: MOCK consent required",
+    "properties": {
+      "message": "travel_rule_consent_required: MOCK consent required",
+      "type": "BithumbApiError",
+      "code": "travel_rule_consent_required",
+      "endpoint": "POST /v1/withdraws/coin",
+      "name": "BithumbApiError"
+    }
+  }
+}
+```
+
 ### F11. 감사 로그 저장 실패를 조용히 무시함 — P1
 
 **오류 위치 — 보관된 0.8.5 배포 코드**
@@ -197,6 +460,23 @@
 - 영향: 기록이 남는다고 믿는 상태에서 장애 추적 자료가 사라질 수 있다.
 - 할 일: 로그 상태를 진단·경고로 노출한다. 우리 서비스에서 감사 기록 실패 시 신규 쓰기를 중단할지 정책을 정한다.
 - 완료 기준: 저장 실패가 탐지되며 정해진 중단/경고 정책이 작동하고 복구 후 기록이 재개된다.
+
+**2026-09-14 재검사 상세**
+
+- 판정: **재현 유지 — 실제 TradeLogger**.
+- 재현 입력: 로그 디렉터리 위치에 일반 파일을 만들어 디렉터리 생성과 append가 실패하게 구성.
+- 실행 경로와 원인: 파일 생성 실패가 catch에서 무시되어 logWritten=false, errorThrown=false, stderr 빈 문자열이 된다.
+- 해석과 제한: 실제 디스크를 채우거나 시스템 권한을 바꾸지 않았다. 이 검사에서 확인한 것은 실패 미통지이며 거래 중단 정책의 존재를 시험한 것은 아니다.
+- 이번 실행 증거: [results-v3.json](./recheck-20260914/results-v3.json)의 `audit_storage_failure_silent` 항목.
+
+```json
+{
+  "test": "audit_storage_failure_silent",
+  "logWritten": false,
+  "errorThrown": false,
+  "stderr": ""
+}
+```
 
 ## 4. 조건부 위험과 설계 경계
 
@@ -213,6 +493,31 @@
 
 우리는 주문 의도 ID와 실행 상태를 영속 저장하고, 응답을 못 받은 주문을 `UNKNOWN`으로 보관해야 한다. 재전송 전에 거래소 조회와 대조한다. 최신 API의 사용자 주문 ID·중복 방지 보장 범위를 먼저 확인한다. 해당 기능이 없으면 완전한 exactly-once 실행을 약속하지 않는다. CLI 실패 후 MCP fallback도 동일한 중복 방지 정책을 적용한다.
 
+**2026-09-14 재검사 상세**
+
+- 판정: **조건부 위험 유지**.
+- 재현 입력: 첫 모의 POST는 접수 건수를 증가시킨 뒤 TimeoutError 발생. harness가 같은 주문을 명시적으로 한 번 더 실행.
+- 실행 경로와 원인: 모의 접수 2건, client_order_id 없는 요청 2건. 킷 자체의 자동 재시도는 없다.
+- 해석과 제한: 공식 주문 문서에 client_order_id가 실제로 존재한다. 문제는 기능 자체의 부재가 아니라 이 경로에서 ID·조회·대조가 자동 적용되지 않는다는 점이다. 서버의 ID 중복 처리 보장은 추가 확인한다.
+- 이번 실행 증거: [results-v2.json](./recheck-20260914/results-v2.json)의 `ambiguous_order_timeout` 항목.
+
+```json
+{
+  "test": "ambiguous_order_timeout",
+  "failure": {
+    "name": "NetworkError",
+    "message": "Failed to call POST /v2/orders.",
+    "suggestion": "Check network connectivity and try again."
+  },
+  "simulatedAcceptedOrdersAfterExplicitSecondCall": 2,
+  "requestsHaveClientId": [
+    false,
+    false
+  ],
+  "kitAutomaticallyRetried": false
+}
+```
+
 ### C02. 취소 접수를 취소 완료로 표현 — P1 보완
 
 **오류 위치 — 보관된 0.8.5 배포 코드**
@@ -222,6 +527,27 @@
 모의 취소 접수 응답만으로 CLI가 `Order cancelled`를 출력하며 후속 주문 조회는 없었다. 공식 문서의 취소 접수와 최종 취소 상태를 구분해야 한다. 실제 서버의 상태 전이 시간은 미검증이다.
 
 우리는 `취소 요청 접수`와 `취소 확인`을 구분하고, 부분 체결·취소 경쟁 상태를 조회로 대조한다. 취소 요청 성공만으로 예약 자산을 해제하거나 대체 주문을 중복 생성하지 않는다.
+
+**2026-09-14 재검사 상세**
+
+- 판정: **조건부 위험 유지**.
+- 재현 입력: 취소 응답에 order_id와 created_at만 반환.
+- 실행 경로와 원인: DELETE 1회 후 Order cancelled를 출력하고 GET 대조가 없다.
+- 해석과 제한: 접수와 최종 취소의 시간차·체결 경쟁은 실서버 미검증이다. 메시지와 후속 확인 절차의 차이로 한정한다.
+- 이번 실행 증거: [results-v2.json](./recheck-20260914/results-v2.json)의 `cancel_acceptance_reported_as_cancelled` 항목.
+
+```json
+{
+  "test": "cancel_acceptance_reported_as_cancelled",
+  "stdout": "Order cancelled: MOCK_CANCEL\norder_id: MOCK_CANCEL\ncreated_at: 2026-09-11T00:00:00Z\n",
+  "requests": [
+    {
+      "method": "DELETE",
+      "url": "https://api.bithumb.com/v2/order?order_id=MOCK_CANCEL"
+    }
+  ]
+}
+```
 
 ### C03. CLI 읽기 전용 설정과 MCP 설정은 별개 — P0 설정 통제
 
@@ -234,6 +560,21 @@ MCP 시작 경로는 TOML을 무시하는 설정을 사용한다. CLI 프로필�
 
 우리는 진입점마다 실제 적용된 계정·권한·모듈·읽기 전용 상태를 검사하고, 설정 차이를 명확히 보여줘야 한다.
 
+**2026-09-14 재검사 상세**
+
+- 판정: **설정 경계 재확인**.
+- 재현 입력: CLI TOML에 read_only=true를 저장한 상태와 ignoreToml=true 로드를 비교.
+- 실행 경로와 원인: TOML 생략 경로에서는 readOnly가 false다. 그러나 실제 MCP --read-only는 요청을 정상 차단한다.
+- 해석과 제한: 보호 우회로 표현하지 않는다. CLI 설정이 별도 MCP 프로세스에 상속된다고 가정하면 안 되는 문제다.
+- 이번 실행 증거: [results.json](./recheck-20260914/results.json)의 `mcp_startup_ignores_toml` 항목.
+
+```json
+{
+  "test": "mcp_startup_ignores_toml",
+  "readOnly": false
+}
+```
+
 ### C04. MD의 승인 지침은 코드의 승인 강제와 다름 — P0 설계
 
 **오류 위치 — 보관된 0.8.5 배포 코드**
@@ -243,6 +584,22 @@ MCP 시작 경로는 TOML을 무시하는 설정을 사용한다. CLI 프로필�
 핵심 runner의 쓰기 호출은 사용자 확인 단계를 자체 강제하지 않는다. AI 클라이언트가 제공하는 승인 기능까지 없다는 뜻은 아니다.
 
 우리는 AI가 제안한 주문을 별도 실행 정책으로 검증한다. 무인 매매를 허용하려면 사용자가 사전 승인한 종목·금액·빈도·손실 한도·기간을 코드로 제한한다. 매 요청 확인이 필요한 운영 방식과 무인 자동매매 정책을 혼동하지 않는다.
+
+**2026-09-14 재검사 상세**
+
+- 판정: **설계 경계 재확인**.
+- 재현 입력: 가짜 client와 쓰기 허용 config로 runner에 주문 요청.
+- 실행 경로와 원인: runner는 사용자 질문 없이 모의 POST를 호출한다.
+- 해석과 제한: runner가 강제하지 않는다는 범위다. AI 앱의 승인 UI 존재 여부를 단정하지 않는다. 무인 매매는 사전 승인된 범위를 별도 실행 정책으로 강제해야 한다.
+- 이번 실행 증거: [results.json](./recheck-20260914/results.json)의 `no_confirmation_or_preflight_in_runner` 항목.
+
+```json
+{
+  "test": "no_confirmation_or_preflight_in_runner",
+  "mockPosts": 1,
+  "clientOrderIdPresent": false
+}
+```
 
 ### C05. 문서 누락·드리프트와 사용 조건 — P2, 추가 확인
 
@@ -405,7 +762,8 @@ node audit-v3.mjs
 - [x] 1~3차 재현 코드·결과·배포 패키지를 임시 경로 밖에 보관.
 - [x] 확인 사실, 조건부 위험, 추가 검사 항목을 구분.
 - [ ] 최신 문서 원문·스키마를 접근 시각과 함께 스냅샷으로 보관.
-- [ ] 실제 SDK/AI 클라이언트에서 F04의 입력 허용·차단 경로 확인.
+- [x] 실제 MCP SDK 1.26.0 stdio 서버에서 F04의 입력 허용·차단 경로 확인.
+- [ ] 실제 사용할 AI 앱의 추가 입력 검증 확인.
 - [ ] C05 문서 누락·배치 개수·사용 조건의 원문 근거 재확보.
 
 완료 조건: 제3자가 동일 버전·모의 입력으로 결과를 재현하고 한계를 이해할 수 있다.

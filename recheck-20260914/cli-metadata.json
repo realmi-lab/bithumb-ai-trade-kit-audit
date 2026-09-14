@@ -1,0 +1,68 @@
+{
+  "bin": {
+    "bithumb": "dist/index.js"
+  },
+  "dist": {
+    "shasum": "f1a285563b3316af375f42f6d2aa4f395fac2b36",
+    "tarball": "https://registry.npmjs.org/@bithumb-official/bithumb-cli/-/bithumb-cli-0.8.5.tgz",
+    "fileCount": 43,
+    "integrity": "sha512-WMCTY77iHj6Y60CdBVlVZyBV16SeyYDX3VFktGoimL3ANqh0Itqjn23hMZ7kMd/CsZhCOWX/q3y72KfADTNtNw==",
+    "signatures": [
+      {
+        "sig": "MEYCIQC77ce8cKm1ZUjs2z5+PIqziyoE/10V79Irjp14BKxcsAIhAJoFTNKz6vtA8Qws/+UjMngWpwetIOtviSyNKvnmZZT5",
+        "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+      }
+    ],
+    "unpackedSize": 685809
+  },
+  "main": "dist/index.js",
+  "name": "@bithumb-official/bithumb-cli",
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=18"
+  },
+  "gitHead": "1096e78612c9e140f24a31169dd929266bb08530",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist",
+    "test:unit": "node --import tsx/esm --test --test-reporter=spec test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "_npmUser": {
+    "name": "bithumb-npm",
+    "email": "developers@bithumbcorp.com"
+  },
+  "keywords": [
+    "bithumb",
+    "cli",
+    "trade",
+    "exchange",
+    "cryptocurrency"
+  ],
+  "_npmVersion": "10.9.8",
+  "description": "Bithumb Trade CLI",
+  "directories": {},
+  "maintainers": [
+    {
+      "name": "bithumb-npm",
+      "email": "developers@bithumbcorp.com"
+    }
+  ],
+  "_nodeVersion": "22.22.3",
+  "_hasShrinkwrap": false,
+  "devDependencies": {
+    "tsx": "^4.19.3",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "@types/node": "^22.0.0",
+    "@bithumb-official/bithumb-core": "file:../core"
+  },
+  "_npmOperationalInternal": {
+    "tmp": "tmp/bithumb-cli_0.8.5_1780985821278_0.6323360532996467",
+    "host": "s3://npm-registry-packages-npm-production"
+  },
+  "_id": "@bithumb-official/bithumb-cli@0.8.5",
+  "version": "0.8.5"
+}

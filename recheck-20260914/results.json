@@ -1,0 +1,50 @@
+[
+  {
+    "test": "profile",
+    "profile": "view",
+    "usedAccount": "FAKE_ACCOUNT_A",
+    "readOnly": true
+  },
+  {
+    "test": "profile",
+    "profile": "typo_missing",
+    "usedAccount": "FAKE_ENV_ACCOUNT_B",
+    "readOnly": false
+  },
+  {
+    "test": "profile",
+    "profile": "incomplete",
+    "usedAccount": "FAKE_ENV_ACCOUNT_B",
+    "readOnly": false
+  },
+  {
+    "test": "mcp_startup_ignores_toml",
+    "readOnly": false
+  },
+  {
+    "test": "no_confirmation_or_preflight_in_runner",
+    "mockPosts": 1,
+    "clientOrderIdPresent": false
+  },
+  {
+    "test": "positive_control_readonly",
+    "blocked": true
+  },
+  {
+    "test": "all_batch_items_fail",
+    "exitCode": 0
+  },
+  {
+    "test": "redaction",
+    "arraySecretUnmasked": true,
+    "accessKeyUnmasked": true,
+    "topLevelSecretMasked": true
+  },
+  {
+    "test": "failed_batch_audit_log",
+    "level": "info",
+    "result": {
+      "status": "ok"
+    }
+  }
+]

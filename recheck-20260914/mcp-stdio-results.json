@@ -1,0 +1,162 @@
+[
+  {
+    "test": "real_stdio_drops_tif",
+    "sdk": "1.26.0",
+    "readOnly": false,
+    "input": "post_only",
+    "advertisesTimeInForce": false,
+    "requestCount": 1,
+    "lastRequest": {
+      "method": "POST",
+      "url": "https://example.invalid/v2/orders",
+      "body": {
+        "market": "KRW-BTC",
+        "side": "bid",
+        "order_type": "limit",
+        "price": "100000000",
+        "volume": "0.001"
+      }
+    },
+    "response": {
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"tool\": \"trade_place_order\",\n  \"ok\": true,\n  \"data\": {\n    \"endpoint\": \"POST /v2/orders\",\n    \"requestTime\": \"2026-09-14T00:42:29.741Z\",\n    \"data\": {\n      \"order_id\": \"MOCK_ONLY\"\n    }\n  },\n  \"timestamp\": \"2026-09-14T00:42:29.745Z\"\n}"
+          }
+        ],
+        "structuredContent": {
+          "tool": "trade_place_order",
+          "ok": true,
+          "data": {
+            "endpoint": "POST /v2/orders",
+            "requestTime": "2026-09-14T00:42:29.741Z",
+            "data": {
+              "order_id": "MOCK_ONLY"
+            }
+          },
+          "timestamp": "2026-09-14T00:42:29.745Z"
+        }
+      },
+      "jsonrpc": "2.0",
+      "id": 3
+    }
+  },
+  {
+    "test": "real_stdio_drops_tif",
+    "sdk": "1.26.0",
+    "readOnly": false,
+    "input": "ioc",
+    "advertisesTimeInForce": false,
+    "requestCount": 2,
+    "lastRequest": {
+      "method": "POST",
+      "url": "https://example.invalid/v2/orders",
+      "body": {
+        "market": "KRW-BTC",
+        "side": "bid",
+        "order_type": "limit",
+        "price": "100000000",
+        "volume": "0.001"
+      }
+    },
+    "response": {
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"tool\": \"trade_place_order\",\n  \"ok\": true,\n  \"data\": {\n    \"endpoint\": \"POST /v2/orders\",\n    \"requestTime\": \"2026-09-14T00:42:29.748Z\",\n    \"data\": {\n      \"order_id\": \"MOCK_ONLY\"\n    }\n  },\n  \"timestamp\": \"2026-09-14T00:42:29.748Z\"\n}"
+          }
+        ],
+        "structuredContent": {
+          "tool": "trade_place_order",
+          "ok": true,
+          "data": {
+            "endpoint": "POST /v2/orders",
+            "requestTime": "2026-09-14T00:42:29.748Z",
+            "data": {
+              "order_id": "MOCK_ONLY"
+            }
+          },
+          "timestamp": "2026-09-14T00:42:29.748Z"
+        }
+      },
+      "jsonrpc": "2.0",
+      "id": 4
+    }
+  },
+  {
+    "test": "real_stdio_drops_tif",
+    "sdk": "1.26.0",
+    "readOnly": false,
+    "input": "fok",
+    "advertisesTimeInForce": false,
+    "requestCount": 3,
+    "lastRequest": {
+      "method": "POST",
+      "url": "https://example.invalid/v2/orders",
+      "body": {
+        "market": "KRW-BTC",
+        "side": "bid",
+        "order_type": "limit",
+        "price": "100000000",
+        "volume": "0.001"
+      }
+    },
+    "response": {
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"tool\": \"trade_place_order\",\n  \"ok\": true,\n  \"data\": {\n    \"endpoint\": \"POST /v2/orders\",\n    \"requestTime\": \"2026-09-14T00:42:29.749Z\",\n    \"data\": {\n      \"order_id\": \"MOCK_ONLY\"\n    }\n  },\n  \"timestamp\": \"2026-09-14T00:42:29.749Z\"\n}"
+          }
+        ],
+        "structuredContent": {
+          "tool": "trade_place_order",
+          "ok": true,
+          "data": {
+            "endpoint": "POST /v2/orders",
+            "requestTime": "2026-09-14T00:42:29.749Z",
+            "data": {
+              "order_id": "MOCK_ONLY"
+            }
+          },
+          "timestamp": "2026-09-14T00:42:29.749Z"
+        }
+      },
+      "jsonrpc": "2.0",
+      "id": 5
+    }
+  },
+  {
+    "test": "real_stdio_readonly_blocks",
+    "sdk": "1.26.0",
+    "readOnly": true,
+    "input": "post_only",
+    "advertisesTimeInForce": false,
+    "requestCount": 0,
+    "lastRequest": null,
+    "response": {
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"tool\": \"trade_place_order\",\n  \"error\": true,\n  \"type\": \"BithumbApiError\",\n  \"code\": \"READ_ONLY_MODE\",\n  \"message\": \"'trade_place_order' is a write operation and cannot be used in read-only mode.\",\n  \"timestamp\": \"2026-09-14T00:42:29.830Z\",\n  \"serverVersion\": \"0.8.5\"\n}"
+          }
+        ],
+        "structuredContent": {
+          "tool": "trade_place_order",
+          "error": true,
+          "type": "BithumbApiError",
+          "code": "READ_ONLY_MODE",
+          "message": "'trade_place_order' is a write operation and cannot be used in read-only mode.",
+          "timestamp": "2026-09-14T00:42:29.830Z",
+          "serverVersion": "0.8.5"
+        },
+        "isError": true
+      },
+      "jsonrpc": "2.0",
+      "id": 3
+    }
+  }
+]

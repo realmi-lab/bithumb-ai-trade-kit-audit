@@ -1,0 +1,14 @@
+[
+  {
+    "package": "cli",
+    "version": "0.8.5",
+    "integrity_valid": true,
+    "all_tarball_files_match": true
+  },
+  {
+    "package": "mcp",
+    "version": "0.8.5",
+    "integrity_valid": true,
+    "all_tarball_files_match": true
+  }
+]
