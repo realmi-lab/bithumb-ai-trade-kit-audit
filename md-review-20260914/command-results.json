@@ -1,0 +1,62 @@
+[
+  {
+    "command": "bithumb trade list --states wait,watch",
+    "requests": [
+      {
+        "url": "https://example.invalid/v1/orders?states[]=wait&states[]=watch",
+        "method": "GET"
+      }
+    ],
+    "stdout": "[]\n",
+    "stderr": "",
+    "error": null,
+    "exitCode": 0
+  },
+  {
+    "command": "bithumb trade list --state wait",
+    "requests": [
+      {
+        "url": "https://example.invalid/v1/orders?state=wait",
+        "method": "GET"
+      }
+    ],
+    "stdout": "[]\n",
+    "stderr": "",
+    "error": null,
+    "exitCode": 0
+  },
+  {
+    "command": "bithumb trade list",
+    "requests": [
+      {
+        "url": "https://example.invalid/v1/orders",
+        "method": "GET"
+      }
+    ],
+    "stdout": "[]\n",
+    "stderr": "",
+    "error": null,
+    "exitCode": 0
+  },
+  {
+    "command": "bithumb withdraw chance --currency BTC",
+    "requests": [],
+    "stdout": "",
+    "stderr": "Error: --currency and --net-type required. Example: bithumb withdraw chance --currency BTC --net-type BTC\n",
+    "error": null,
+    "exitCode": 1
+  },
+  {
+    "command": "bithumb withdraw list --currency BTC --limit 1",
+    "requests": [
+      {
+        "url": "https://example.invalid/v1/withdraws?currency=BTC&limit=1",
+        "method": "GET"
+      }
+    ],
+    "stdout": "[\n  {\n    \"uuid\": \"MOCK_OTHER_LATER_WITHDRAWAL\",\n    \"currency\": \"BTC\",\n    \"state\": \"DONE\"\n  }\n]\n",
+    "stderr": "",
+    "error": null,
+    "exitCode": 0
+  }
+]

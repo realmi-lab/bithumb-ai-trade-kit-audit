@@ -1,0 +1,42 @@
+[
+  {
+    "file": "skills/bithumb-deposit/SKILL.md",
+    "line": 34,
+    "link": "references/deposit-commands.md"
+  },
+  {
+    "file": "skills/bithumb-deposit/SKILL.md",
+    "line": 46,
+    "link": "references/read-only-gate.md"
+  },
+  {
+    "file": "skills/bithumb-deposit/SKILL.md",
+    "line": 64,
+    "link": "references/deposit-commands.md"
+  },
+  {
+    "file": "skills/bithumb-deposit/SKILL.md",
+    "line": 78,
+    "link": "references/deposit-commands.md"
+  },
+  {
+    "file": "skills/bithumb-withdraw/SKILL.md",
+    "line": 40,
+    "link": "references/withdraw-commands.md"
+  },
+  {
+    "file": "skills/bithumb-withdraw/SKILL.md",
+    "line": 55,
+    "link": "references/withdraw-commands.md"
+  },
+  {
+    "file": "skills/bithumb-withdraw/SKILL.md",
+    "line": 73,
+    "link": "references/withdrawal-type-params.md"
+  },
+  {
+    "file": "skills/bithumb-withdraw/SKILL.md",
+    "line": 85,
+    "link": "references/withdrawal-type-params.md"
+  }
+]
