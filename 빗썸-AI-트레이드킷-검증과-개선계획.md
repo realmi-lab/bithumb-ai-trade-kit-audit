@@ -46,9 +46,16 @@
 
 ## 3. 확인한 허점과 고칠 기준
 
+각 항목의 오류 위치 링크는 검증 자료를 보관한 GitHub 커밋 `62cba4a15302be83241f5a90f976434e4bebf1ba`에 고정했다. 줄 번호는 npm 0.8.5 배포 번들 기준이며 upstream TypeScript 원본 줄 번호가 아니다. 최신 버전에서는 위치와 동작을 다시 확인한다. 링크는 코드 근거를 가리키며, 누락 동작의 증명은 함께 보관한 재현 결과와 대조한다.
+
 우선순위는 우리 서비스 도입 시의 작업 순서다. 공식 CVSS 평가가 아니다. P0는 실거래 연결 전 차단, P1은 운영 전 보완, P2는 후속 강화다.
 
 ### F01. 설정 파싱 오류가 Secret Key를 출력함 — P0
+
+**오류 위치 — 보관된 0.8.5 배포 코드**
+
+- [cli/package/dist/chunk-Y64A2CTR.js:3079–3089](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/chunk-Y64A2CTR.js#L3079-L3089) — readFullConfig: 파서 오류 원문을 예외 메시지에 포함.
+- [cli/package/dist/index.js:221–224](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/index.js#L221-L224) — main.catch: Fatal 오류를 stderr에 출력.
 
 - 조건: `secret_key="FAKE_SECRET"` 다음 줄 등에 `read_only=tru`처럼 TOML 오타가 있다.
 - 실제 동작: 파서 오류가 주변 원문을 포함하고, CLI가 이를 그대로 표준 오류에 출력한다. 유효한 비밀키 줄도 함께 나온다.
@@ -60,6 +67,12 @@
 
 ### F02. 없는/불완전한 프로필에서 환경변수 계정으로 넘어감 — P0
 
+**오류 위치 — 보관된 0.8.5 배포 코드**
+
+- [cli/package/dist/chunk-Y64A2CTR.js:3095–3099](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/chunk-Y64A2CTR.js#L3095-L3099) — readTomlProfile: 없는 프로필을 빈 객체로 반환.
+- [cli/package/dist/chunk-Y64A2CTR.js:3134–3149](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/chunk-Y64A2CTR.js#L3134-L3149) — loadConfig: 불완전한 명시 프로필에서 환경변수 키 선택.
+- [cli/package/dist/chunk-Y64A2CTR.js:3189–3189](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/chunk-Y64A2CTR.js#L3189) — readOnly: 값이 없으면 false.
+
 - 조건: 프로필 이름 오타 또는 키 일부 누락, 환경변수에는 다른 계정 키가 있다.
 - 실제 동작: 환경변수 키가 선택되고 읽기 전용이 false인 상태로 쓰기 요청까지 생성될 수 있다.
 - 근거: 1차 profile 항목 및 2차 CLI 재현.
@@ -68,6 +81,10 @@
 - 완료 기준: 잘못된 프로필에서 네트워크 호출 0회. 의도한 정상 프로필에서는 성공. 자동 fallback은 명시적 정책 없이는 금지한다.
 
 ### F03. 읽기 전용 마법사의 알 수 없는 입력이 보호를 해제함 — P0
+
+**오류 위치 — 보관된 0.8.5 배포 코드**
+
+- [cli/package/dist/config-FAPUDUEP.js:205–220](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/config-FAPUDUEP.js#L205-L220) — runProfileWizard: y/yes 외 입력을 false로 저장.
 
 - 조건: `Read-only? (y/N) [y]:`에 `true`를 입력한다.
 - 실제 동작: `y`/`yes` 외 비어 있지 않은 입력을 false로 처리하여 기존 true를 false로 저장한다.
@@ -78,6 +95,10 @@
 
 ### F04. MCP 단일 주문에서 time_in_force가 빠짐 — P0
 
+**오류 위치 — 보관된 0.8.5 배포 코드**
+
+- [mcp/package/dist/index.js:1724–1778](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/mcp/package/dist/index.js#L1724-L1778) — trade_place_order: 스키마와 요청 본문에서 time_in_force 누락.
+
 - 조건: 단일 주문 handler에 `post_only`, `ioc`, `fok`를 전달한다.
 - 실제 동작: 오류 없이 요청 본문에서 해당 필드를 제외한다. 배치 주문은 보존한다. CLI의 미지원 옵션은 오류로 차단한다.
 - 근거: 2차 `MCP_single_order_drops_time_in_force`, 배치 대조군; 공식 주문 요청 문서.
@@ -87,6 +108,11 @@
 
 ### F05. 배치 주문 전체 실패인데 CLI는 성공 종료·성공 로그 — P1
 
+**오류 위치 — 보관된 0.8.5 배포 코드**
+
+- [cli/package/dist/trade-XUYIIU4K.js:218–228](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/trade-XUYIIU4K.js#L218-L228) — cmdBatchPlace: 항목별 실패 판정 없이 결과 출력.
+- [cli/package/dist/index.js:99–110](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/index.js#L99-L110) — wrapRunnerWithLogger: 정상 반환을 status ok로 기록.
+
 - 실제 동작: 모든 주문 항목이 실패해도 종료 코드 0이며 감사 로그가 성공으로 분류된다.
 - 근거: 1차 `all_batch_items_fail`, `failed_batch_audit_log`; 2차 `full_CLI_all_failed_batch`.
 - 영향: 셸 스케줄러나 AI가 배치를 성공으로 판단할 수 있다.
@@ -94,6 +120,10 @@
 - 완료 기준: 전부 실패는 실패 종료, 부분 성공은 명시된 정책으로 표시. 재시도는 성공 항목까지 다시 보내지 않는다.
 
 ### F06. 로그 마스킹이 배열과 일부 키 이름을 놓침 — P1
+
+**오류 위치 — 보관된 0.8.5 배포 코드**
+
+- [cli/package/dist/chunk-Y64A2CTR.js:3199–3219](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/chunk-Y64A2CTR.js#L3199-L3219) — redactSensitive: 민감 필드 목록과 배열 재귀 처리 경계.
 
 - 실제 동작: 가짜 비밀값을 배열 또는 `access_key` 형태로 넣으면 남는다. 최상위 일부 secret 필드는 가려진다.
 - 근거: 1차 `redaction`.
@@ -103,6 +133,12 @@
 
 ### F07. 감사 로그 조회 응답을 다시 로그로 기록하여 중첩 증가 — P1
 
+**오류 위치 — 보관된 0.8.5 배포 코드**
+
+- [mcp/package/dist/index.js:1908–1938](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/mcp/package/dist/index.js#L1908-L1938) — readEntries: 로그 전체 읽기·파싱.
+- [mcp/package/dist/index.js:1977–1998](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/mcp/package/dist/index.js#L1977-L1998) — system_get_audit_log: 기존 로그 반환.
+- [mcp/package/dist/index.js:3308–3316](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/mcp/package/dist/index.js#L3308-L3316) — createServer: 응답 전체를 다시 logTool로 기록.
+
 - 실제 동작: `system_get_audit_log` 응답 전체가 다시 로그에 포함된다. 읽기 전용에서도 발생한다.
 - 근거: 2차 기본 limit 20으로 7회 조회한 로그 파일 크기 381→973→2157→4525→9261→18733→37677 bytes; 7번째 응답 73671 bytes.
 - 영향: 반복 조회로 디스크·파싱 메모리·AI 입력이 증폭된다. 실제 디스크 고갈/OOM은 시험하지 않았다.
@@ -110,6 +146,13 @@
 - 완료 기준: 반복 조회 증가량이 설정한 상한 내에 있고 과거 로그가 재귀 포함되지 않는다. 작은 limit에 전체 로그를 읽지 않는다.
 
 ### F08. 호출 제한을 API 분류 합산 대신 개별 도구로 나눔 — P1
+
+**오류 위치 — 보관된 0.8.5 배포 코드**
+
+- [cli/package/dist/chunk-Y64A2CTR.js:927–970](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/chunk-Y64A2CTR.js#L927-L970) — RateLimiter: config.key별 버킷.
+- [cli/package/dist/chunk-Y64A2CTR.js:1274–1281](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/chunk-Y64A2CTR.js#L1274-L1281) — privateRateLimit: 개별 key로 제한 생성.
+- [cli/package/dist/chunk-Y64A2CTR.js:1665–1665](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/chunk-Y64A2CTR.js#L1665) — account_get_assets의 독립 key.
+- [cli/package/dist/chunk-Y64A2CTR.js:1691–1691](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/chunk-Y64A2CTR.js#L1691) — account_get_order_chance의 독립 key.
 
 - 실제 동작: 고정 시각에서 assets 100회 + order chance 100회가 각각 버킷을 통과하여 총 200회가 모의 fetch에 도달했다.
 - 계약: 조사 당시 공식 문서는 IP·분류별 제한, Private 기타 초당 140회를 명시했다. 향후 변경 여부 재확인 필요.
@@ -119,6 +162,10 @@
 
 ### F09. 인증 진단 실패도 종료 코드 0 — P1
 
+**오류 위치 — 보관된 0.8.5 배포 코드**
+
+- [cli/package/dist/system-7NJPR4AY.js:32–37](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/system-7NJPR4AY.js#L32-L37) — cmdDiagnose: checks 실패를 종료 코드에 반영하지 않음.
+
 - 실제 동작: 인증 거절을 모의 응답으로 주면 `Auth Validity fail`은 표시되지만 종료 코드는 0이다.
 - 근거: 2차 진단 CLI 테스트.
 - 영향: 종료 코드만 검사하는 사전 점검이 통과할 수 있다. JSON checks를 읽으면 실패는 확인된다.
@@ -126,6 +173,10 @@
 - 완료 기준: 필수 검사 실패 시 다음 거래 단계가 실행되지 않는다. 선택적 경고와 필수 실패를 구분한다.
 
 ### F10. 출금 동의 오류의 consent_url이 사라짐 — P1
+
+**오류 위치 — 보관된 0.8.5 배포 코드**
+
+- [cli/package/dist/chunk-Y64A2CTR.js:1176–1200](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/chunk-Y64A2CTR.js#L1176-L1200) — BithumbRestClient: error.name/message만 추출하여 예외로 변환.
 
 - 계약: 공식 출금 문서의 422 `travel_rule_consent_required`는 `consent_url`로 접속해 동의를 완료하도록 안내한다.
 - 실제 동작: 오류 변환이 이름·메시지 위주로 필드를 추려 URL을 버린다.
@@ -135,6 +186,11 @@
 - 완료 기준: 문서의 실제 응답 스키마를 추가 확인하고 URL이 호출자에게 전달된다. 무관한 민감정보를 통째로 노출하지 않는다.
 
 ### F11. 감사 로그 저장 실패를 조용히 무시함 — P1
+
+**오류 위치 — 보관된 0.8.5 배포 코드**
+
+- [cli/package/dist/chunk-Y64A2CTR.js:3221–3242](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/chunk-Y64A2CTR.js#L3221-L3242) — TradeLogger: 로그 디렉터리 생성 오류 무시.
+- [cli/package/dist/chunk-Y64A2CTR.js:3276–3283](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/chunk-Y64A2CTR.js#L3276-L3283) — TradeLogger.log: appendFileSync 오류 무시.
 
 - 실제 동작: 디렉터리로 사용할 수 없는 로그 경로에서도 로그 미생성, 예외 없음, stderr 없음.
 - 근거: 3차 `audit_storage_failure_silent`; TradeLogger의 catch 처리.
@@ -148,11 +204,20 @@
 
 ### C01. 주문 결과 불명 상태에 일반적인 재시도 안내 — P0 보완
 
+**오류 위치 — 보관된 0.8.5 배포 코드**
+
+- [cli/package/dist/chunk-Y64A2CTR.js:918–925](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/chunk-Y64A2CTR.js#L918-L925) — NetworkError: 일반 재시도 제안.
+- [cli/package/dist/chunk-Y64A2CTR.js:1141–1159](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/chunk-Y64A2CTR.js#L1141-L1159) — BithumbRestClient: 전송 예외를 NetworkError로 변환.
+
 모의 서버가 주문을 수신한 뒤 응답 전달에서 실패하도록 만들면 `NetworkError`와 재시도 안내가 나오며 주문 조회로 결과를 대조하지 않는다. 테스트 코드가 명시적으로 두 번째 호출을 했을 때 모의 주문 2개가 생성됐다. 킷 자체가 자동 재시도했다는 뜻은 아니다.
 
 우리는 주문 의도 ID와 실행 상태를 영속 저장하고, 응답을 못 받은 주문을 `UNKNOWN`으로 보관해야 한다. 재전송 전에 거래소 조회와 대조한다. 최신 API의 사용자 주문 ID·중복 방지 보장 범위를 먼저 확인한다. 해당 기능이 없으면 완전한 exactly-once 실행을 약속하지 않는다. CLI 실패 후 MCP fallback도 동일한 중복 방지 정책을 적용한다.
 
 ### C02. 취소 접수를 취소 완료로 표현 — P1 보완
+
+**오류 위치 — 보관된 0.8.5 배포 코드**
+
+- [cli/package/dist/trade-XUYIIU4K.js:134–152](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/trade-XUYIIU4K.js#L134-L152) — cmdCancel: 취소 응답 직후 Order cancelled 출력.
 
 모의 취소 접수 응답만으로 CLI가 `Order cancelled`를 출력하며 후속 주문 조회는 없었다. 공식 문서의 취소 접수와 최종 취소 상태를 구분해야 한다. 실제 서버의 상태 전이 시간은 미검증이다.
 
@@ -160,17 +225,28 @@
 
 ### C03. CLI 읽기 전용 설정과 MCP 설정은 별개 — P0 설정 통제
 
+**오류 위치 — 보관된 0.8.5 배포 코드**
+
+- [mcp/package/dist/index.js:3380–3389](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/mcp/package/dist/index.js#L3380-L3389) — MCP 시작: ignoreToml true.
+- [cli/package/dist/chunk-Y64A2CTR.js:3134–3135](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/chunk-Y64A2CTR.js#L3134-L3135) — loadConfig: ignoreToml이면 TOML 생략.
+
 MCP 시작 경로는 TOML을 무시하는 설정을 사용한다. CLI 프로필의 read_only가 자동 상속되지 않는다. MCP에 명시한 읽기 전용 차단은 작동했다. 이를 읽기 전용 우회라고 부르지 않는다.
 
 우리는 진입점마다 실제 적용된 계정·권한·모듈·읽기 전용 상태를 검사하고, 설정 차이를 명확히 보여줘야 한다.
 
 ### C04. MD의 승인 지침은 코드의 승인 강제와 다름 — P0 설계
 
+**오류 위치 — 보관된 0.8.5 배포 코드**
+
+- [cli/package/dist/chunk-Y64A2CTR.js:3062–3075](https://github.com/realmi-lab/bithumb-ai-trade-kit-audit/blob/62cba4a15302be83241f5a90f976434e4bebf1ba/bithumb-audit-evidence-20260911/cli/package/dist/chunk-Y64A2CTR.js#L3062-L3075) — createToolRunner: 권한 확인 후 handler 호출; 자체 승인 단계 없음.
+
 핵심 runner의 쓰기 호출은 사용자 확인 단계를 자체 강제하지 않는다. AI 클라이언트가 제공하는 승인 기능까지 없다는 뜻은 아니다.
 
 우리는 AI가 제안한 주문을 별도 실행 정책으로 검증한다. 무인 매매를 허용하려면 사용자가 사전 승인한 종목·금액·빈도·손실 한도·기간을 코드로 제한한다. 매 요청 확인이 필요한 운영 방식과 무인 자동매매 정책을 혼동하지 않는다.
 
 ### C05. 문서 누락·드리프트와 사용 조건 — P2, 추가 확인
+
+**오류 위치:** 정확한 원문 근거를 재확보하기 전이므로 확정 줄 번호를 지정하지 않는다. F01~F11처럼 재현된 코드 결함으로 분류하지 않는다.
 
 이전 조사에서 일부 참조 문서 누락 및 배치 개수 안내 차이(20/30)가 관찰됐지만 이 문서의 확정 결함 목록에는 넣지 않았다. 정확한 문서 경로·당시 본문·API 계약을 다시 확보한 뒤 보고한다. 구형 `/v1/orders` 및 uuid/uuids를 쓴다는 이유만으로 오류라 판정하지 않는다. 최신 문서에 유지된 계약도 있다.
 
